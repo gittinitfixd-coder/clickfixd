@@ -1,0 +1,50 @@
+const analyzeBtn = document.getElementById('analyzeBtn');
+const photoInput = document.getElementById('photoInput');
+const resultDiv = document.getElementById('result');
+
+// Your OpenAI API key
+const OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE";
+
+analyzeBtn.addEventListener('click', async () => {
+  const file = photoInput.files[0];
+  if (!file) {
+    alert("Please upload a photo first!");
+    return;
+  }
+
+  resultDiv.innerHTML = "Analyzing problem...";
+
+  try {
+    // Convert image to base64
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      const base64Image = reader.result.split(",")[1];
+
+      // Send request to OpenAI
+      const response = await fetch("https://api.openai.com/v1/images/edits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          image: base64Image,
+          prompt: "Analyze this image of a home repair problem. Describe what's broken and give step-by-step instructions and a materials list."
+        })
+      });
+
+      const data = await response.json();
+
+      if (data && data.choices && data.choices.length > 0) {
+        resultDiv.innerHTML = `<h3>AI Analysis:</h3><p>${data.choices[0].text}</p>`;
+      } else {
+        resultDiv.innerHTML = "Sorry, AI could not analyze this image.";
+      }
+    };
+  } catch (err) {
+    console.error(err);
+    resultDiv.innerHTML = "Error analyzing image.";
+  }
+});

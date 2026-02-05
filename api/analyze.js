@@ -1,33 +1,18 @@
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
     const { imageBase64 } = req.body;
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer YOUR_OPENAI_API_KEY_HERE`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
-          {
-            role: "user",
-            content: `Analyze this image of a home repair problem and give a step-by-step fix, materials list, and what’s broken: ${imageBase64}`
-          }
-        ]
-      })
-    });
+    const fakeResponse = `
+      AI Analysis (demo): The uploaded image shows a potential repair issue. 
+      Step 1: Inspect the area carefully. 
+      Step 2: Identify the broken part. 
+      Step 3: Gather materials and tools needed. 
+      Step 4: Follow step-by-step instructions to fix it.
+    `;
 
-    const data = await response.json();
-    const text = data.output_text || "AI could not analyze the image.";
-    res.status(200).json({ result: text });
+    res.status(200).json({ result: fakeResponse });
 
   } catch (err) {
     console.error(err);

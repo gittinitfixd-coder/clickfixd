@@ -7,11 +7,46 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>ClickFix AI Home Repair</h1>
+  
   <input type="file" id="photoInput" accept="image/*">
   <button id="analyzeBtn">Analyze Problem</button>
   <div id="result"></div>
 
-  <script src="app.js"></script>
+  <script>
+const analyzeBtn = document.getElementById('analyzeBtn');
+const photoInput = document.getElementById('photoInput');
+const resultDiv = document.getElementById('result');
+
+analyzeBtn.addEventListener('click', async () => {
+  const file = photoInput.files[0];
+  if (!file) {
+    alert("Please upload a photo first!");
+    return;
+  }
+
+  resultDiv.innerHTML = "Analyzing problem...";
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = async () => {
+    const base64Image = reader.result.split(",")[1];
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: base64Image })
+      });
+
+      const data = await response.json();
+      resultDiv.innerHTML = `<h3>AI Analysis:</h3><p>${data.result}</p>`;
+
+    } catch (err) {
+      console.error(err);
+      resultDiv.innerHTML = "Error analyzing image.";
+    }
+  };
+});
+  </script>
 </body>
 </html>
